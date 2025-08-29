@@ -19,14 +19,8 @@ export default function RegisterPage() {
       try {
         await createUser(formData);
         window.location.href = "/login";
-      } catch (err: unknown) {
-        if (err instanceof Error) {
-          setError(err.message);
-        } else if (typeof err === "string") {
-          setError(err);
-        } else {
-          setError("Something went wrong");
-        }
+      } catch (err: any) {
+        setError(err.message || "Something went wrong");
       }
     });
   }
