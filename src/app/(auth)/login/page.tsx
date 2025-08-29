@@ -29,8 +29,14 @@ export default function LoginPage() {
         }
 
         window.location.href = `/profile/${data.user.username}`;
-      } catch (err: any) {
-        setError(err?.message || "Login failed");
+      } catch (err: unknown) {
+        if (err instanceof Error) {
+          setError(err.message);
+        } else if (typeof err === "string") {
+          setError(err);
+        } else {
+          setError("Something went wrong");
+        }
       }
     });
   }
@@ -108,7 +114,7 @@ export default function LoginPage() {
           <Button
             type="submit"
             disabled={isPending}
-            className="w-full bg-[#5A2F36] hover:bg-[#AA8054] text-white rounded-xl py-2.5"
+            className="w-full bg-[#5A2F36] hover:bg-[#AA8054] text-white rounded-xl py-2.5 hover: cursor-pointer"
           >
             {isPending ? "Signing in..." : "Sign in"}
           </Button>
