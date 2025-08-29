@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState, useTransition } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -19,7 +20,9 @@ export default function RegisterPage() {
       try {
         await createUser(formData);
         window.location.href = "/login";
-      } catch (err: any) {
+      } 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      catch (err: any) {
         setError(err.message || "Something went wrong");
       }
     });
@@ -34,10 +37,12 @@ export default function RegisterPage() {
         className="w-full max-w-md bg-[#F6F1E7] border border-[#BCB0A4] shadow-lg rounded-2xl p-8"
       >
         <div className="flex flex-col items-center mb-6">
-          <img
+          <Image
             src="/logo/logo-bgremoved.png"
             alt="Brain Shelf Logo"
-            className="w-14 h-14 mb-3"
+            width={56}
+            height={56}
+            className="mb-3"
           />
           <h1 className="text-2xl font-bold text-[#13100E]">
             Create your account
@@ -47,7 +52,14 @@ export default function RegisterPage() {
           </p>
         </div>
 
-        <form action={handleSubmit} className="space-y-5">
+        <form
+          className="space-y-5"
+          onSubmit={(e) => {
+            e.preventDefault();
+            const formData = new FormData(e.currentTarget);
+            handleSubmit(formData);
+          }}
+        >
           <div>
             <Label htmlFor="username" className="text-[#272320]">
               Username
@@ -122,7 +134,7 @@ export default function RegisterPage() {
           <Button
             type="submit"
             disabled={isPending}
-            className="w-full bg-[#5A2F36] hover:bg-[#AA8054] text-white rounded-xl py-2.5 hover: cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-[#5A2F36] hover:bg-[#AA8054] text-white rounded-xl py-2.5 hover:cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isPending ? "Creating account..." : "Create Account"}
           </Button>
