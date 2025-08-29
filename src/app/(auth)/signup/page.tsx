@@ -1,12 +1,30 @@
 "use client";
 
 import Link from "next/link";
+import { useState, useTransition } from "react";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { motion } from "framer-motion";
+import { createUser } from "@/actions/createUser";
 
 export default function RegisterPage() {
+  const [error, setError] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
+
+  async function handleSubmit(formData: FormData) {
+    setError(null);
+
+    startTransition(async () => {
+      try {
+        await createUser(formData);
+        window.location.href = "/login";
+      } catch (err: any) {
+        setError(err.message || "Something went wrong");
+      }
+    });
+  }
+
   return (
     <section className="flex items-center justify-center min-h-screen bg-[#C8B69D] px-6">
       <motion.div
@@ -29,13 +47,28 @@ export default function RegisterPage() {
           </p>
         </div>
 
-        <form className="space-y-5">
+        <form action={handleSubmit} className="space-y-5">
+          <div>
+            <Label htmlFor="username" className="text-[#272320]">
+              Username
+            </Label>
+            <Input
+              id="username"
+              name="username"
+              type="text"
+              placeholder="yourusername"
+              required
+              className="mt-1 border-[#BCB0A4] focus:ring-[#AA8054] focus:border-[#AA8054] bg-white"
+            />
+          </div>
+
           <div>
             <Label htmlFor="email" className="text-[#272320]">
               Email
             </Label>
             <Input
               id="email"
+              name="email"
               type="email"
               placeholder="name@email.com"
               required
@@ -49,6 +82,7 @@ export default function RegisterPage() {
             </Label>
             <Input
               id="password"
+              name="password"
               type="password"
               placeholder="••••••••"
               required
@@ -62,6 +96,7 @@ export default function RegisterPage() {
             </Label>
             <Input
               id="confirm-password"
+              name="confirm-password"
               type="password"
               placeholder="••••••••"
               required
@@ -86,10 +121,13 @@ export default function RegisterPage() {
 
           <Button
             type="submit"
-            className="w-full bg-[#5A2F36] hover:bg-[#AA8054] text-white rounded-xl py-2.5"
+            disabled={isPending}
+            className="w-full bg-[#5A2F36] hover:bg-[#AA8054] text-white rounded-xl py-2.5 hover: cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Create Account
+            {isPending ? "Creating account..." : "Create Account"}
           </Button>
+
+          {error && <p className="text-center text-sm text-red-600">{error}</p>}
 
           <p className="text-center text-sm text-[#6C635C]">
             Already have an account?{" "}

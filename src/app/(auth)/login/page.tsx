@@ -1,12 +1,40 @@
 "use client";
 
 import Link from "next/link";
+import { useState, useTransition } from "react";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { motion } from "framer-motion";
 
 export default function LoginPage() {
+  const [error, setError] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
+
+  async function handleSubmit(formData: FormData) {
+    setError(null);
+
+    startTransition(async () => {
+      try {
+        const res = await fetch("/api/login", {
+          method: "POST",
+          body: formData,
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          setError(data.error || "Login failed");
+          return;
+        }
+
+        window.location.href = `/profile/${data.user.username}`;
+      } catch (err: any) {
+        setError(err?.message || "Login failed");
+      }
+    });
+  }
+
   return (
     <section className="flex items-center justify-center min-h-screen bg-[#C8B69D] px-6">
       <motion.div
@@ -29,25 +57,35 @@ export default function LoginPage() {
           </p>
         </div>
 
-        <form className="space-y-5">
+        <form
+          className="space-y-5"
+          onSubmit={(e) => {
+            e.preventDefault();
+            const formData = new FormData(e.currentTarget);
+            handleSubmit(formData);
+          }}
+        >
           <div>
             <Label htmlFor="email" className="text-[#272320]">
               Email
             </Label>
             <Input
               id="email"
+              name="email"
               type="email"
               placeholder="name@email.com"
               required
               className="mt-1 border-[#BCB0A4] focus:ring-[#AA8054] focus:border-[#AA8054] bg-white"
             />
           </div>
+
           <div>
             <Label htmlFor="password" className="text-[#272320]">
               Password
             </Label>
             <Input
               id="password"
+              name="password"
               type="password"
               placeholder="••••••••"
               required
@@ -55,31 +93,27 @@ export default function LoginPage() {
             />
           </div>
 
-          <div className="flex items-center justify-between text-sm">
-            <div className="flex items-center space-x-2">
-              <input
-                id="remember"
-                type="checkbox"
-                className="w-4 h-4 rounded border-[#BCB0A4] text-[#5A2F36] focus:ring-[#AA8054]"
-              />
-              <Label htmlFor="remember" className="text-[#6C635C]">
-                Remember me
-              </Label>
-            </div>
-            <Link
-              href="/forgot-password"
-              className="text-[#5A2F36] hover:underline"
-            >
-              Forgot password?
-            </Link>
+          <div className="flex items-center space-x-2">
+            <input
+              id="remember"
+              name="remember"
+              type="checkbox"
+              className="w-4 h-4 rounded border-[#BCB0A4] text-[#5A2F36] focus:ring-[#AA8054]"
+            />
+            <Label htmlFor="remember" className="text-[#6C635C]">
+              Remember me
+            </Label>
           </div>
 
           <Button
             type="submit"
+            disabled={isPending}
             className="w-full bg-[#5A2F36] hover:bg-[#AA8054] text-white rounded-xl py-2.5"
           >
-            Sign in
+            {isPending ? "Signing in..." : "Sign in"}
           </Button>
+
+          {error && <p className="text-center text-sm text-red-600">{error}</p>}
 
           <p className="text-center text-sm text-[#6C635C]">
             Don’t have an account?{" "}
