@@ -6,10 +6,7 @@ import jwt from "jsonwebtoken";
 const JWT_SECRET = process.env.JWT_SECRET || "dev-secret";
 
 export async function POST(req: Request) {
-  const formData = await req.formData();
-  const email = formData.get("email") as string;
-  const password = formData.get("password") as string;
-  const remember = formData.get("remember") === "on";
+  const { email, password, remember } = await req.json();
 
   if (!email || !password) {
     return NextResponse.json({ error: "Email and password required" }, { status: 400 });
@@ -27,11 +24,11 @@ export async function POST(req: Request) {
     { expiresIn: remember ? "30d" : "1h" }
   );
 
-  const res = NextResponse.json({ user: { id: user.id, username: user.username } });
+  const res = NextResponse.json({
+    user: { id: user.id, username: user.username },
+  });
 
-  res.cookies.set({
-    name: "session",
-    value: token,
+  res.cookies.set("session", token, {
     httpOnly: true,
     path: "/",
     maxAge: remember ? 60 * 60 * 24 * 30 : 60 * 60,

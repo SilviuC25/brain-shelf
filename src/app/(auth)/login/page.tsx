@@ -17,9 +17,16 @@ export default function LoginPage() {
 
     startTransition(async () => {
       try {
+        const body = {
+          email: formData.get("email"),
+          password: formData.get("password"),
+          remember: formData.get("remember") === "on",
+        };
+
         const res = await fetch("/api/login", {
           method: "POST",
-          body: formData,
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
         });
 
         const data = await res.json();
